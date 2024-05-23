@@ -1,0 +1,8 @@
+Bienvenue dans le jeu du Morpion !!!
+Afin de me simplifier la tâche, je vous invite à jouer à tour de rôle sur un PC
+Les règles sont simples:
+    - Le joueur 1 commence par poser un pion sur la grille en donnant sa position (exemple: A1).
+    - Le deuxième joueur peut alorsd poser son pion.
+    - Il faut former un ligne diagonale, horizontale ou verticale de trois de ses pions pour gagner.
+
+Bonne Chance !!!
