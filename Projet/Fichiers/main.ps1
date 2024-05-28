@@ -31,7 +31,7 @@ function log {
         Message = $message
     }
 
-    Add-Member -InputObject $LogPrincipal -NotePropertyMembers @{"Tour$($tour)" = $LogNouveauTour} -PassThru
+    Add-Member -InputObject $LogPrincipal -NotePropertyMembers @{"Tour$($tour)" = (ConvertTo-Json -InputObject $LogNouveauTour)} -PassThru
 
 }
 
@@ -68,8 +68,9 @@ function afficherRegles {
 }
 
 # Création de l'objet de log à insérer ensuite dans log.json
-$logPartie = [PSCustomObject]@{
-    Date = Get-Date
+$dateDuJeu = Get-Date 
+$logPartie = [System.Collections.IDictionary]@{
+    Date = [String] $dateDuJeu.DateTime
     joueur1 = $joueur1
     joueur2 = $joueur2
 }
@@ -77,7 +78,7 @@ $logPartie = [PSCustomObject]@{
 function WriteLogs {
     param (
         [Parameter(Mandatory=$true)]
-        $LogPrincipal,
+        [PSCustomObject]$LogPrincipal,
         [Parameter(Mandatory=$true)]
         $message
     )
@@ -86,9 +87,13 @@ function WriteLogs {
 
     Add-Member -InputObject $LogPrincipal -NotePropertyMembers @{message = $message} -PassThru
 
-    $fichierLog = Get-Content -LiteralPath $PathLog -Encoding UTF8 | Out-String | ConvertFrom-Json
+    $fichierLog = Get-Content -LiteralPath $PathLog -Encoding UTF8 | ConvertFrom-Json
 
-    Add-Member -InputObject $fichierLog.parties -NotePropertyMembers (ConvertTo-Json -InputObject $LogPrincipal)
+    $nbreParties = Import-Csv -Delimiter ";" -LiteralPath ((Get-ChildItem "Projet\Fichiers\log.json" -Recurse -ErrorAction SilentlyContinue).FullName)
+
+    Add-Member -InputObject $fichierLog.parties -Name "partie$($nbreParties.Nombre_de_parties)" -Value $LogPrincipal -MemberType AliasProperty
+
+    Out-File -FilePath $PathLog -Encoding utf8 -InputObject (ConvertTo-Json -InputObject $fichierLog)
     
 }
 
