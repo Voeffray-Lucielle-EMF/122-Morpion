@@ -11,10 +11,10 @@ Description: Jeu du morpion avec un scoreboard et des logs
 #>
 
 param(
-    [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
-    [string] $joueur1 = "Anonyme1",
-    [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
-    [string] $joueur2 = "Anonyme2"
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [string] $joueur1,
+    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [string] $joueur2
 )
 
 $global:A1 = 64
@@ -45,9 +45,9 @@ function whatToDo {
     $Options = Read-Host "Voulez-vous voir le scoreboard (scoreboard), jouer (jouer) ou quitter le jeu (quitter) ?"
 
     switch ($Options) {
-        ($Options.toLower -eq "jouer") { jeu }
-        ($Options.ToLower -eq "scoreboard") { afficherScore }
-        ($Options.ToLower -eq "quitter") { Write-Host "Extinction des feux"; exit }
+        "jouer" { jeu }
+        "scoreboard" { afficherScore }
+        "quitter" { Write-Host "Extinction des feux"; exit }
         Default { Write-Host "Faut écrire correctement ! Pour la peine je boude, adieu"; exit }
     }
     
@@ -55,11 +55,12 @@ function whatToDo {
 
 function afficherScore {
     # Trouver le fichier de scoreboard
-    $PathScoreboard = (Get-ChildItem "Projet\Fichiers\leaderboard.csv" -Recurse -ErrorAction SilentlyContinue).FullName
 
-    $board = Import-Csv -LiteralPath $PathScoreboard -Delimiter ";" | Sort-Object -Property Score
+    $board = Import-Csv -Path "leaderboard.csv" -Delimiter "," | Sort-Object -Property Score
 
-    Out-File -InputObject $board
+    Out-Host -InputObject $board
+
+    whatToDo
     
 }
 
@@ -95,21 +96,22 @@ function checkWinner {
     )
 
     # Combos gagants
-    $g1 = {$grille[$A1],$grille[$A2],$grille[$A3]}
-    $g2 = {$grille[$B1],$grille[$B2],$grille[$B3]}
-    $g3 = {$grille[$C1],$grille[$C2],$grille[$C3]}
-    $g4 = {$grille[$A1],$grille[$B1],$grille[$C1]}
-    $g5 = {$grille[$A2],$grille[$B2],$grille[$C2]}
-    $g6 = {$grille[$A3],$grille[$B3],$grille[$C3]}
-    $g7 = {$grille[$A1],$grille[$B2],$grille[$C3]}
-    $g8 = {$grille[$A3],$grille[$B2],$grille[$C3]}
+    $g1 = @($grille[$A1],$grille[$A2],$grille[$A3])
+    $g2 = @($grille[$B1],$grille[$B2],$grille[$B3])
+    $g3 = @($grille[$C1],$grille[$C2],$grille[$C3])
+    $g4 = @($grille[$A1],$grille[$B1],$grille[$C1])
+    $g5 = @($grille[$A2],$grille[$B2],$grille[$C2])
+    $g6 = @($grille[$A3],$grille[$B3],$grille[$C3])
+    $g7 = @($grille[$A1],$grille[$B2],$grille[$C3])
+    $g8 = @($grille[$A3],$grille[$B2],$grille[$C3])
 
     # Tous les combos
-    $combos = {$g1,$g2,$g3,$g4,$g5,$g6,$g7,$g8}
+    $combos = @($g1,$g2,$g3,$g4,$g5,$g6,$g7,$g8)
 
     # Boucle qui contrôle s'il y a un combos gagnant présent dans la grille actuelle
     $ret = $false
-    for ($i = 0; $i -lt 8; $i++) {
+    Write-Host $combos.Count
+    for ($i = 0; $i -lt $combos.Count; $i++) {
         if ((($combos[$i][0] -eq $combos[$i][1]) -and ($combos[$i][0] -eq $combos[$i][2])) -and ($combos[$i][0] -ne " ")) {
             $ret = $true
             break
@@ -120,10 +122,43 @@ function checkWinner {
     
 }
 
+function WriteScore {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $gagnant
+    )
 
+    $board = Import-Csv -Path "leaderboard.csv" -Delimiter ","
+
+    $exists = $false
+
+    ForEach-Object -InputObject $board {
+        if ($_.Utilisateur -eq $gagnant) {
+            $exists = $true
+        }
+    }
+    
+    if ($exists) {
+        for ($i = 0; $i -lt $board.Count; $i++) {
+            if ($board[$i].Utilisateur -eq $gagnant) {
+                [int32] $board[$i].Score += 1
+                $board[$i].Date_du_dernier_match = Get-Date
+            }
+        }
+        ConvertTo-CSV -InputObject $board > .\leaderboard.csv
+    } else {
+        "$($gagnant),1,$(Get-Date)" | Add-Content -Path .\leaderboard.csv
+    }
+    
+    
+    Write-Host "Le score du gagnant a été mis à jour"
+
+}
+
+# Fonctionnement du jeu
 function jeu {
 
-    log -TypeEntree "[INFO]" -message "-----Début du jeu entre $($joueur1) et $($joueur2)-----"
+    log -TypeEntree "[INFO]" -message "----- Début du jeu entre $($joueur1) et $($joueur2) -----"
     
     $Grille = [char[]] @"
     |===|=A=|=B=|=C=|===|
@@ -363,6 +398,9 @@ function jeu {
     } else {
         Write-Host "$($joueur1) a gagné la partie"
     }
+
+    whatToDo
 }
 
-jeu
+    WriteScore
+    # log -TypeEntree "[INFO]" -message "Lancement du programme"
