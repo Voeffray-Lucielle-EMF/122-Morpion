@@ -17,21 +17,12 @@ param(
 function log {
     param (
         [Parameter(Mandatory=$true)]
-        [PSCustomObject] $LogPrincipal,
-        [Parameter(Mandatory=$true)]
         [string] $TypeEntree,
-        [Parameter(Mandatory=$true)]
-        [int] $tour,
         [Parameter(Mandatory=$true)]
         [string] $message
     )
 
-    $LogNouveauTour = @{
-        Type = $TypeEntree
-        Message = $message
-    }
-
-    Add-Member -InputObject $LogPrincipal -NotePropertyMembers @{"Tour$($tour)" = (ConvertTo-Json -InputObject $LogNouveauTour)} -PassThru
+    Out-File -FilePath "Projet/Fichiers/logs.log" -Encoding utf8 -Append -InputObject "$(Get-Date) $($TypeEntree) $($message)"
 
 }
 
@@ -67,46 +58,10 @@ function afficherRegles {
     Get-Content -LiteralPath $PathRegles | Write-Host
 }
 
-# Création de l'objet de log à insérer ensuite dans log.json
-$dateDuJeu = Get-Date 
-$logPartie = [System.Collections.IDictionary]@{
-    Date = [String] $dateDuJeu.DateTime
-    joueur1 = $joueur1
-    joueur2 = $joueur2
-}
-
-function WriteLogs {
-    param (
-        [Parameter(Mandatory=$true)]
-        [PSCustomObject]$LogPrincipal,
-        [Parameter(Mandatory=$true)]
-        $message
-    )
-
-    $PathLog = (Get-ChildItem "Projet\Fichiers\log.json" -Recurse -ErrorAction SilentlyContinue).FullName
-
-    Add-Member -InputObject $LogPrincipal -NotePropertyMembers @{message = $message} -PassThru
-
-    $fichierLog = Get-Content -LiteralPath $PathLog -Encoding UTF8 | ConvertFrom-Json
-
-    $nbreParties = Import-Csv -Delimiter ";" -LiteralPath ((Get-ChildItem "Projet\Fichiers\log.json" -Recurse -ErrorAction SilentlyContinue).FullName)
-
-    Add-Member -InputObject $fichierLog.parties -Name "partie$($nbreParties.Nombre_de_parties)" -Value $LogPrincipal -MemberType AliasProperty
-
-    Out-File -FilePath $PathLog -Encoding utf8 -InputObject (ConvertTo-Json -InputObject $fichierLog)
-    
-}
-
 # Définir les chemin vers le fichiers nécessaires au bon fonctionnement du jeu
-
 $PathGrille = (Get-ChildItem "Projet\Fichiers\grille.txt" -Recurse -ErrorAction SilentlyContinue).FullName
 
 
-log -LogPrincipal $logPartie -TypeEntree "[DEBUG]" -tour 1 -message "Test de la fonction"
-WriteLogs -LogPrincipal $logPartie -message "Test de lancement de la fonction"
-
-
-
-
+log -TypeEntree "[DEBUG]" -message "Test de la fonction"
 
 
