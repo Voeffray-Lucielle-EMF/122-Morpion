@@ -27,7 +27,7 @@ $global:A3 = 172
 $global:B3 = 176
 $global:C3 = 180
 
-# Ajouter le log de tour aux logs de la partie
+# Ajouter une ligne de log au fichier logs.log
 function log {
     param (
         [Parameter(Mandatory = $true)]
@@ -56,7 +56,7 @@ function whatToDo {
 function afficherScore {
     # Trouver le fichier de scoreboard
 
-    $board = Import-Csv -Path "leaderboard.csv" -Delimiter "," | Sort-Object -Property Score
+    $board = Import-Csv -Path "leaderboard.csv" -Delimiter "," | Sort-Object -Property Score -Descending
 
     Out-Host -InputObject $board
 
@@ -96,17 +96,17 @@ function checkWinner {
     )
 
     # Combos gagants
-    $g1 = @($grille[$A1],$grille[$A2],$grille[$A3])
-    $g2 = @($grille[$B1],$grille[$B2],$grille[$B3])
-    $g3 = @($grille[$C1],$grille[$C2],$grille[$C3])
-    $g4 = @($grille[$A1],$grille[$B1],$grille[$C1])
-    $g5 = @($grille[$A2],$grille[$B2],$grille[$C2])
-    $g6 = @($grille[$A3],$grille[$B3],$grille[$C3])
-    $g7 = @($grille[$A1],$grille[$B2],$grille[$C3])
-    $g8 = @($grille[$A3],$grille[$B2],$grille[$C3])
+    $g1 = @($grille[$A1], $grille[$A2], $grille[$A3])
+    $g2 = @($grille[$B1], $grille[$B2], $grille[$B3])
+    $g3 = @($grille[$C1], $grille[$C2], $grille[$C3])
+    $g4 = @($grille[$A1], $grille[$B1], $grille[$C1])
+    $g5 = @($grille[$A2], $grille[$B2], $grille[$C2])
+    $g6 = @($grille[$A3], $grille[$B3], $grille[$C3])
+    $g7 = @($grille[$A1], $grille[$B2], $grille[$C3])
+    $g8 = @($grille[$A3], $grille[$B2], $grille[$C3])
 
     # Tous les combos
-    $combos = @($g1,$g2,$g3,$g4,$g5,$g6,$g7,$g8)
+    $combos = @($g1, $g2, $g3, $g4, $g5, $g6, $g7, $g8)
 
     # Boucle qui contrôle s'il y a un combos gagnant présent dans la grille actuelle
     $ret = $false
@@ -128,13 +128,14 @@ function WriteScore {
         [string] $gagnant
     )
 
-    $board = Import-Csv -Path "leaderboard.csv" -Delimiter ","
+    $board = Import-Csv -Path .\leaderboard.csv -Delimiter ","
 
     $exists = $false
 
-    ForEach-Object -InputObject $board {
-        if ($_.Utilisateur -eq $gagnant) {
+    for ($i = 0; $i -lt $board.Count; $i++) {
+        if ($board[$i].Utilisateur -eq $gagnant) {
             $exists = $true
+            break
         }
     }
     
@@ -145,9 +146,10 @@ function WriteScore {
                 $board[$i].Date_du_dernier_match = Get-Date
             }
         }
-        ConvertTo-CSV -InputObject $board > .\leaderboard.csv
-    } else {
-        "$($gagnant),1,$(Get-Date)" | Add-Content -Path .\leaderboard.csv
+        ConvertTo-CSV -InputObject $board | Out-File -FilePath .\leaderboard.csv
+    }
+    else {
+        "$($gagnant),1,$(Get-Date)" | Out-File -FilePath .\leaderboard.csv -Append -Encoding utf8
     }
     
     
@@ -188,7 +190,8 @@ function jeu {
                 "A1" { 
                     if ($Grille[$A1] -eq " ") {
                         $Grille = placerPion -caseAChanger $A1 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -198,7 +201,8 @@ function jeu {
                 "A2" { 
                     if ($Grille[$A2] -eq " ") {
                         $Grille = placerPion -caseAChanger $A2 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -208,7 +212,8 @@ function jeu {
                 "A3" { 
                     if ($Grille[$A3] -eq " ") {
                         $Grille = placerPion -caseAChanger $A3 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -218,7 +223,8 @@ function jeu {
                 "B1" { 
                     if ($Grille[$B1] -eq " ") {
                         $Grille = placerPion -caseAChanger $B1 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -228,7 +234,8 @@ function jeu {
                 "B2" { 
                     if ($Grille[$B2] -eq " ") {
                         $Grille = placerPion -caseAChanger $B2 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -238,7 +245,8 @@ function jeu {
                 "B3" { 
                     if ($Grille[$B3] -eq " ") {
                         $Grille = placerPion -caseAChanger $B3 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -248,7 +256,8 @@ function jeu {
                 "C1" { 
                     if ($Grille[$C1] -eq " ") {
                         $Grille = placerPion -caseAChanger $C1 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -258,7 +267,8 @@ function jeu {
                 "C2" { 
                     if ($Grille[$C2] -eq " ") {
                         $Grille = placerPion -caseAChanger $C2 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -268,7 +278,8 @@ function jeu {
                 "C3" { 
                     if ($Grille[$C3] -eq " ") {
                         $Grille = placerPion -caseAChanger $C3 -grille $Grille -pion ([char] "X")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -290,7 +301,8 @@ function jeu {
                 "A1" { 
                     if ($Grille[$A1] -eq " ") {
                         $Grille = placerPion -caseAChanger $A1 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -300,7 +312,8 @@ function jeu {
                 "A2" { 
                     if ($Grille[$A2] -eq " ") {
                         $Grille = placerPion -caseAChanger $A2 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -310,7 +323,8 @@ function jeu {
                 "A3" { 
                     if ($Grille[$A3] -eq " ") {
                         $Grille = placerPion -caseAChanger $A3 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -320,7 +334,8 @@ function jeu {
                 "B1" { 
                     if ($Grille[$B1] -eq " ") {
                         $Grille = placerPion -caseAChanger $B1 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -330,7 +345,8 @@ function jeu {
                 "B2" { 
                     if ($Grille[$B2] -eq " ") {
                         $Grille = placerPion -caseAChanger $B2 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -340,7 +356,8 @@ function jeu {
                 "B3" { 
                     if ($Grille[$B3] -eq " ") {
                         $Grille = placerPion -caseAChanger $B3 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -350,7 +367,8 @@ function jeu {
                 "C1" { 
                     if ($Grille[$C1] -eq " ") {
                         $Grille = placerPion -caseAChanger $C1 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -360,7 +378,8 @@ function jeu {
                 "C2" { 
                     if ($Grille[$C2] -eq " ") {
                         $Grille = placerPion -caseAChanger $C2 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -370,7 +389,8 @@ function jeu {
                 "C3" { 
                     if ($Grille[$C3] -eq " ") {
                         $Grille = placerPion -caseAChanger $C3 -grille $Grille -pion ([char] "O")
-                    } else {
+                    }
+                    else {
                         log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
                         Write-Host "La case entrée n'est pas valide, veuillez recommencer"
                         $tour -= 1
@@ -395,12 +415,15 @@ function jeu {
 
     if ($tour % 2 -eq 0) {
         Write-Host "$($joueur2) a gagné la partie"
-    } else {
+    }
+    else {
         Write-Host "$($joueur1) a gagné la partie"
     }
 
     whatToDo
 }
 
-    WriteScore
-    # log -TypeEntree "[INFO]" -message "Lancement du programme"
+
+WriteScore
+# whatToDo
+# log -TypeEntree "[INFO]" -message "Lancement du programme"
