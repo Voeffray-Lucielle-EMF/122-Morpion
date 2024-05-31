@@ -65,12 +65,7 @@ function afficherScore {
 }
 
 function afficherRegles {
-    
-    # Trouver le chemin pour le fichier de règles
-    $PathRegles = (Get-ChildItem "Projet\Fichiers\regles.txt" -Recurse -ErrorAction SilentlyContinue).FullName
-
-    # Afficher les règles
-    Get-Content -LiteralPath $PathRegles | Write-Host
+    Get-Content -Path .\regles.txt | Write-Host
 }
 
 function placerPion {
