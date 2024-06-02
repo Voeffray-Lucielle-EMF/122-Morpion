@@ -4,7 +4,7 @@ Autrice: Lucielle Anya Voeffray
 Date de création: 22.05.2024
 Contact: lucielle.voeffray@studentfr.ch
 
-Version: 0
+Version: 0.0
 
 Description: Jeu du morpion avec un scoreboard et des logs
 -----------------------------------------------------------
@@ -137,7 +137,7 @@ function WriteScore {
     if ($exists) {
         for ($i = 0; $i -lt $board.Count; $i++) {
             if ($board[$i].Utilisateur -eq $gagnant) {
-                [int32] $board[$i].Score += 1
+                [int32] $board[$i].Score = $board.Score + 1
                 $board[$i].Date_du_dernier_match = Get-Date
             }
         }
