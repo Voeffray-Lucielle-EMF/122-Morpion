@@ -137,11 +137,17 @@ function WriteScore {
     if ($exists) {
         for ($i = 0; $i -lt $board.Count; $i++) {
             if ($board[$i].Utilisateur -eq $gagnant) {
-                [int32] $board[$i].Score = $board.Score + 1
+                [int32] $score = $board[$i].Score
+                $score++
+                Out-Host -InputObject $board[$i]
+                $board[$i].Score = $score
                 $board[$i].Date_du_dernier_match = Get-Date
+                Out-Host -InputObject $board[$i]
             }
         }
-        ConvertTo-CSV -InputObject $board | Out-File -FilePath .\leaderboard.csv
+        
+        Out-Host -InputObject $board
+        Export-Csv -Path .\leaderboard.csv -InputObject $board -Delimiter "," -Encoding utf8
     }
     else {
         "$($gagnant),1,$(Get-Date)" | Out-File -FilePath .\leaderboard.csv -Append -Encoding utf8
