@@ -56,7 +56,7 @@ function whatToDo {
 function afficherScore {
     # Trouver le fichier de scoreboard
 
-    $board = Import-Csv -Path "leaderboard.csv" -Delimiter "," | Sort-Object -Property Score -Descending
+    $board = Import-Csv -Path "leaderboard.csv" -Delimiter ";" | Sort-Object -Property Score -Descending
 
     Out-Host -InputObject $board
 
@@ -123,7 +123,7 @@ function WriteScore {
         [string] $gagnant
     )
 
-    $board = Import-Csv -Path .\leaderboard.csv -Delimiter ","
+    $board = Import-Csv -Path .\leaderboard.csv -Delimiter ";"
 
     $exists = $false
 
@@ -133,24 +133,22 @@ function WriteScore {
             break
         }
     }
-    
+
     if ($exists) {
         for ($i = 0; $i -lt $board.Count; $i++) {
-            if ($board[$i].Utilisateur -eq $gagnant) {
+            if ($board[$i].Utilisateur.ToLower -eq $gagnant) {
                 [int32] $score = $board[$i].Score
                 $score++
-                Out-Host -InputObject $board[$i]
                 $board[$i].Score = $score
                 $board[$i].Date_du_dernier_match = Get-Date
-                Out-Host -InputObject $board[$i]
             }
         }
         
         Out-Host -InputObject $board
-        Export-Csv -Path .\leaderboard.csv -InputObject $board -Delimiter "," -Encoding utf8
+        $board | Export-Csv -Path .\leaderboard.csv -Delimiter ";" -Encoding utf8
     }
     else {
-        "$($gagnant),1,$(Get-Date)" | Out-File -FilePath .\leaderboard.csv -Append -Encoding utf8
+        "$($gagnant.ToLower());1;$(Get-Date)" | Out-File -FilePath .\leaderboard.csv -Append -Encoding utf8
     }
     
     
@@ -409,6 +407,13 @@ function jeu {
 
         $termine = checkWinner -grille $Grille
 
+        if ($tour % 2 -ne 0 -and $termine) {
+            WriteScore -gagnant $joueur1
+        }
+        elseif ($tour % 2 -eq 0 -and $termine) {
+            WriteScore -gagnant $joueur2
+        }
+
 
     }
 
@@ -425,6 +430,6 @@ function jeu {
 }
 
 
-WriteScore
-# whatToDo
-# log -TypeEntree "[INFO]" -message "Lancement du programme"
+log -TypeEntree "[INFO]" -message "Lancement du programme"
+whatToDo
+

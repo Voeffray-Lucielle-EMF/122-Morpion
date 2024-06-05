@@ -1,8 +1,3 @@
 
-$board = Import-Csv -Path .\leaderboard.csv -Delimiter ","
-
-foreach ($line in $board) {
-    [Int32] $score = $line.Score
-
-    Write-Host "Le score est : $($score + 1)" 
-}
+git config --global user.name "Voeffray-Lucielle-EMF"
+git config --global user.email "lucielle.voeffray@studentfr.ch"
