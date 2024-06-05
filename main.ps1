@@ -4,7 +4,7 @@ Autrice: Lucielle Anya Voeffray
 Date de création: 22.05.2024
 Contact: lucielle.voeffray@studentfr.ch
 
-Version: 0.1
+Version: 0.5
 
 Description: Jeu du morpion avec un scoreboard et des logs
 -----------------------------------------------------------
@@ -64,7 +64,11 @@ function afficherScore {
         Out-Host -InputObject $board
     }
     catch {
-        Log -TypeEntree "[DEBUG]" -message "Erreur lors de la lecture du fichier de scoreboard"
+        Log -TypeEntree "[DEBUG]" -message "Erreur lors de la lecture du fichier leaderboard.csv"
+        #Créer le fichier leaderboard.csv
+        Out-File -FilePath "leaderboard.csv" -Encoding utf8 -Append -InputObject '"Utilisateur";"Score";"Date_du_dernier_match"'
+        Log -TypeEntree "[INFO]" -message "leaderboard.csv créé"
+        Writ-Host "Le scoreboard est vide, veuillez jouer une partie pour pouvoir afficher les scores"
     }
 
     whatToDo
@@ -78,6 +82,17 @@ function afficherRegles {
     }
     catch {
         Log -TypeEntree "[DEBUG]" -message "Erreur lors de la lecture du fichier des règles"
+        Out-File -FilePath "regles.txt" -Encoding utf8 -Append -InputObject @"
+        Bienvenue dans le jeu du Morpion !!!
+        Afin de me simplifier la tâche, je vous invite à jouer à tour de rôle sur un PC
+        Les règles sont simples:
+            - Le joueur 1 commence par poser un pion sur la grille en donnant sa position (exemple: A1).
+            - Le deuxième joueur peut alorsd poser son pion.
+            - Il faut former un ligne diagonale, horizontale ou verticale de trois de ses pions pour gagner.
+        
+        Bonne Chance !!!
+"@
+        afficherRegles
     }
 }
 
@@ -112,7 +127,7 @@ function checkWinner {
     $g5 = @($grille[$A2], $grille[$B2], $grille[$C2])
     $g6 = @($grille[$A3], $grille[$B3], $grille[$C3])
     $g7 = @($grille[$A1], $grille[$B2], $grille[$C3])
-    $g8 = @($grille[$A3], $grille[$B2], $grille[$C3])
+    $g8 = @($grille[$A3], $grille[$B2], $grille[$C1])
 
     # Tous les combos
     $combos = @($g1, $g2, $g3, $g4, $g5, $g6, $g7, $g8)
@@ -130,6 +145,16 @@ function checkWinner {
     
 }
 
+function checkDraw {
+    param (
+        [Parameter(Mandatory = $true)]
+        [char[]] $grille
+    )
+
+    $cases = @($grille[$A1],$grille[$A2],$grille[$A3],$grille[$B1], $grille[$B2], $grille[$B3],$grille[$C1], $grille[$C2], $grille[$C3])
+    
+}
+
 # Prend en paramètre le gagnant et va soit créer une nouvelle entrée dans le fichier leaderboard.csv, soit augmenter le score si le joueur a déjà gagné 
 function WriteScore {
     param (
@@ -142,7 +167,7 @@ function WriteScore {
     $exists = $false
 
     for ($i = 0; $i -lt $board.Count; $i++) {
-        if ($board[$i].Utilisateur -eq $gagnant) {
+        if ($board[$i].Utilisateur.ToLower -eq $gagnant) {
             $exists = $true
             break
         }
@@ -158,7 +183,6 @@ function WriteScore {
             }
         }
         
-        Out-Host -InputObject $board
         $board | Export-Csv -Path .\leaderboard.csv -Delimiter ";" -Encoding utf8
     }
     else {
@@ -179,8 +203,6 @@ function tour {
         [int32] $toure
     )
 
-    [char] $pion
-
     if ($joueur -eq $joueur1) {
         $pion = "X"
     } elseif ($joueur -eq $joueur2) {
@@ -196,7 +218,7 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
@@ -207,7 +229,7 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
@@ -218,7 +240,7 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
@@ -229,7 +251,7 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
@@ -240,7 +262,7 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
@@ -251,7 +273,7 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
@@ -262,7 +284,7 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
@@ -273,7 +295,7 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
@@ -284,18 +306,18 @@ function tour {
             else {
                 log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
                 Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                [int32] $toure = $toure - 1
+                [int32] $toure = ($toure - 1)
                 Continue
             }
         }
         Default {
             log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
             Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-            [int32] $toure = $toure - 1
+            [int32] $toure = ($toure - 1)
             Continue
         }
     }
-
+    
     return $toure
     
 }
@@ -317,42 +339,45 @@ function jeu {
 "@
 
     
-    $tour = 0
+    [int32] $tour = 0
 
     [System.Boolean] $termine = $false
 
-    # Tant que la partie n'est pas terminée (AKA tant qu'aucun joueur n'est annoncé vaincqueur) La boucle se répete en demandant aux joueurs d'entrer la case où poser leur pion
+    # Tant que la partie n'est pas terminée (AKA tant qu'aucun joueur n'est annoncé vainqueur) La boucle se répete en demandant aux joueurs d'entrer la case où poser leur pion
     while ($termine -ne $true) {
         $tour = $tour + 1
         Write-Host $Grille
 
-        # Si le tour est pair, c'est le joueur 2 qui joue, sinon c'est le joueur 1
+        # Si le tour est impair, c'est le joueur 1 qui joue, sinon c'est le joueur 2
         if ($tour % 2 -ne 0) {
-            $tour = tour -joueur $joueur1 -tour $tour
+            $tour = (tour -joueur $joueur1 -tour $tour)
         }
         else {
-            $tour = tour -joueur $joueur2 -tour $tour
+            $tour = (tour -joueur $joueur2 -tour $tour)
         }
 
+        # Savoir si le joueur a gagné
         $termine = checkWinner -grille $Grille
 
+        if ($termine -eq $false) {
+            $draw = checkDraw -grille $Grille
+        }
+
+        # Si un joueur à gagné, déterminer qui
         if (($tour % 2 -ne 0) -and $termine) {
+            Write-Host $Grille
+            Write-Host "$($joueur1) a gagné la partie"
             WriteScore -gagnant $joueur1
         }
         elseif (($tour % 2 -eq 0) -and $termine) {
+            Write-Host $Grille
+            Write-Host "$($joueur2) a gagné la partie"
             WriteScore -gagnant $joueur2
+        } elseif ($draw) {
+            Write-Host $Grille
+            Write-Host "MATCH NUL !!!"
         }
     }
-
-    # Write-Host $Grille
-
-    if ($tour % 2 -eq 0) {
-        Write-Host "$($joueur2) a gagné la partie"
-    }
-    else {
-        Write-Host "$($joueur1) a gagné la partie"
-    }
-
     
     whatToDo
 }
