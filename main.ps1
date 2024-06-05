@@ -4,7 +4,7 @@ Autrice: Lucielle Anya Voeffray
 Date de création: 22.05.2024
 Contact: lucielle.voeffray@studentfr.ch
 
-Version: 0.0
+Version: 0.1
 
 Description: Jeu du morpion avec un scoreboard et des logs
 -----------------------------------------------------------
@@ -17,6 +17,7 @@ param(
     [string] $joueur2
 )
 
+# Les emplacements dans la grille qui doivent être modifiés y mettre un pion. Chaque emplacement a le nom de sa case.
 $global:A1 = 64
 $global:B1 = 68
 $global:C1 = 72
@@ -40,34 +41,47 @@ function log {
 
 }
 
+# La fonction va demander aux joueurs la prochaine action qu'ils souhaite effectuer: -Jouer -Afficher le scoreboard -Quitter. S'ils font une erreur, le script boude et quitte 
 function whatToDo {
 
     $Options = Read-Host "Voulez-vous voir le scoreboard (scoreboard), jouer (jouer) ou quitter le jeu (quitter) ?"
 
     switch ($Options) {
-        "jouer" { jeu }
-        "scoreboard" { afficherScore }
-        "quitter" { Write-Host "Extinction des feux"; exit }
-        Default { Write-Host "Faut écrire correctement ! Pour la peine je boude, adieu"; exit }
+        "jouer" { log -TypeEntree "[INFO]" -message "----- Début du jeu entre $($joueur1) et $($joueur2) -----"; jeu }
+        "scoreboard" { afficherScore log -TypeEntree "[INFO]" -message "Affichage du score demandé" }
+        "quitter" { Write-Host "Extinction des feux"; log -TypeEntree "[INFO]" -message "Extinction des feux" ; exit }
+        Default { Write-Host "Faut écrire correctement ! Pour la peine je boude, adieu"; Log -TypeEntree "[DEBUG]" -message "Les joueurs n'ont pas entré une donnée correcte"; exit }
     }
     
 }
 
+# Affiche le score dans le terminal
 function afficherScore {
     # Trouver le fichier de scoreboard
 
-    $board = Import-Csv -Path "leaderboard.csv" -Delimiter ";" | Sort-Object -Property Score -Descending
-
-    Out-Host -InputObject $board
+    try {
+        $board = Import-Csv -Path "leaderboard.csv" -Delimiter ";" | Sort-Object -Property Score -Descending
+        Out-Host -InputObject $board
+    }
+    catch {
+        Log -TypeEntree "[DEBUG]" -message "Erreur lors de la lecture du fichier de scoreboard"
+    }
 
     whatToDo
     
 }
 
+# Affiche les règles dans le terminal
 function afficherRegles {
-    Get-Content -Path .\regles.txt | Write-Host
+    try {
+        Get-Content -Path .\regles.txt | Write-Host
+    }
+    catch {
+        Log -TypeEntree "[DEBUG]" -message "Erreur lors de la lecture du fichier des règles"
+    }
 }
 
+#Délégation du placement du pion dans la grille
 function placerPion {
     param (
         [Parameter(Mandatory = $true)]
@@ -105,7 +119,6 @@ function checkWinner {
 
     # Boucle qui contrôle s'il y a un combos gagnant présent dans la grille actuelle
     $ret = $false
-    Write-Host $combos.Count
     for ($i = 0; $i -lt $combos.Count; $i++) {
         if ((($combos[$i][0] -eq $combos[$i][1]) -and ($combos[$i][0] -eq $combos[$i][2])) -and ($combos[$i][0] -ne " ")) {
             $ret = $true
@@ -117,6 +130,7 @@ function checkWinner {
     
 }
 
+# Prend en paramètre le gagnant et va soit créer une nouvelle entrée dans le fichier leaderboard.csv, soit augmenter le score si le joueur a déjà gagné 
 function WriteScore {
     param (
         [Parameter(Mandatory = $true)]
@@ -156,12 +170,141 @@ function WriteScore {
 
 }
 
+# Logique derrière un mouvement du joueur
+function tour {
+    param (
+        [Parameter(Mandatory = $true)]
+        [String] $joueur,
+        [Parameter(Mandatory = $true)]
+        [int32] $toure
+    )
+
+    [char] $pion
+
+    if ($joueur -eq $joueur1) {
+        $pion = "X"
+    } elseif ($joueur -eq $joueur2) {
+        $pion = "O"
+    }
+
+    $move = Read-Host "$($joueur), dans quelle case souhaitez-vous poser votre pion ?"
+    switch ($move.ToUpper()) {
+        "A1" { 
+            if ($Grille[$A1] -eq " ") {
+                $Grille = placerPion -caseAChanger $A1 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        "A2" { 
+            if ($Grille[$A2] -eq " ") {
+                $Grille = placerPion -caseAChanger $A2 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        "A3" { 
+            if ($Grille[$A3] -eq " ") {
+                $Grille = placerPion -caseAChanger $A3 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        "B1" { 
+            if ($Grille[$B1] -eq " ") {
+                $Grille = placerPion -caseAChanger $B1 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        "B2" { 
+            if ($Grille[$B2] -eq " ") {
+                $Grille = placerPion -caseAChanger $B2 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        "B3" { 
+            if ($Grille[$B3] -eq " ") {
+                $Grille = placerPion -caseAChanger $B3 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        "C1" { 
+            if ($Grille[$C1] -eq " ") {
+                $Grille = placerPion -caseAChanger $C1 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        "C2" { 
+            if ($Grille[$C2] -eq " ") {
+                $Grille = placerPion -caseAChanger $C2 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        "C3" { 
+            if ($Grille[$C3] -eq " ") {
+                $Grille = placerPion -caseAChanger $C3 -grille $Grille -pion $pion
+            }
+            else {
+                log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+                Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+                [int32] $toure = $toure - 1
+                Continue
+            }
+        }
+        Default {
+            log -TypeEntree "[DEBUG]" -message "$($joueur) n'a pas entré une case valide"
+            Write-Host "La case entrée n'est pas valide, veuillez recommencer"
+            [int32] $toure = $toure - 1
+            Continue
+        }
+    }
+
+    return $toure
+    
+}
+
 # Fonctionnement du jeu
 function jeu {
-
-    log -TypeEntree "[INFO]" -message "----- Début du jeu entre $($joueur1) et $($joueur2) -----"
     
-    $Grille = [char[]] @"
+    # Création de la grille de partie
+    $global:Grille = [char[]] @"
     |===|=A=|=B=|=C=|===|
     ---------------------
     |=1=|   |   |   |=1=|
@@ -178,246 +321,30 @@ function jeu {
 
     [System.Boolean] $termine = $false
 
+    # Tant que la partie n'est pas terminée (AKA tant qu'aucun joueur n'est annoncé vaincqueur) La boucle se répete en demandant aux joueurs d'entrer la case où poser leur pion
     while ($termine -ne $true) {
-        $tour += 1        
+        $tour = $tour + 1
         Write-Host $Grille
-        Write-Host $tour
 
+        # Si le tour est pair, c'est le joueur 2 qui joue, sinon c'est le joueur 1
         if ($tour % 2 -ne 0) {
-            $move = Read-Host "$($joueur1), dans quelle case souhaitez-vous poser votre pion ?"
-            switch ($move.ToUpper()) {
-                "A1" { 
-                    if ($Grille[$A1] -eq " ") {
-                        $Grille = placerPion -caseAChanger $A1 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "A2" { 
-                    if ($Grille[$A2] -eq " ") {
-                        $Grille = placerPion -caseAChanger $A2 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "A3" { 
-                    if ($Grille[$A3] -eq " ") {
-                        $Grille = placerPion -caseAChanger $A3 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "B1" { 
-                    if ($Grille[$B1] -eq " ") {
-                        $Grille = placerPion -caseAChanger $B1 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "B2" { 
-                    if ($Grille[$B2] -eq " ") {
-                        $Grille = placerPion -caseAChanger $B2 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "B3" { 
-                    if ($Grille[$B3] -eq " ") {
-                        $Grille = placerPion -caseAChanger $B3 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "C1" { 
-                    if ($Grille[$C1] -eq " ") {
-                        $Grille = placerPion -caseAChanger $C1 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "C2" { 
-                    if ($Grille[$C2] -eq " ") {
-                        $Grille = placerPion -caseAChanger $C2 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "C3" { 
-                    if ($Grille[$C3] -eq " ") {
-                        $Grille = placerPion -caseAChanger $C3 -grille $Grille -pion ([char] "X")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                Default {
-                    log -TypeEntree "[DEBUG]" -message "$($joueur1) n'a pas entré une case valide"
-                    Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                    $tour -= 1
-                    Continue
-                }
-            }
-
+            $tour = tour -joueur $joueur1 -tour $tour
         }
         else {
-            $move = Read-Host "$($joueur2), dans quelle case souhaitez-vous poser votre pion"
-            switch ($move.ToUpper()) {
-                "A1" { 
-                    if ($Grille[$A1] -eq " ") {
-                        $Grille = placerPion -caseAChanger $A1 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "A2" { 
-                    if ($Grille[$A2] -eq " ") {
-                        $Grille = placerPion -caseAChanger $A2 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "A3" { 
-                    if ($Grille[$A3] -eq " ") {
-                        $Grille = placerPion -caseAChanger $A3 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "B1" { 
-                    if ($Grille[$B1] -eq " ") {
-                        $Grille = placerPion -caseAChanger $B1 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "B2" { 
-                    if ($Grille[$B2] -eq " ") {
-                        $Grille = placerPion -caseAChanger $B2 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "B3" { 
-                    if ($Grille[$B3] -eq " ") {
-                        $Grille = placerPion -caseAChanger $B3 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "C1" { 
-                    if ($Grille[$C1] -eq " ") {
-                        $Grille = placerPion -caseAChanger $C1 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "C2" { 
-                    if ($Grille[$C2] -eq " ") {
-                        $Grille = placerPion -caseAChanger $C2 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                "C3" { 
-                    if ($Grille[$C3] -eq " ") {
-                        $Grille = placerPion -caseAChanger $C3 -grille $Grille -pion ([char] "O")
-                    }
-                    else {
-                        log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                        Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                        $tour -= 1
-                        Continue
-                    }
-                }
-                Default {
-                    log -TypeEntree "[DEBUG]" -message "$($joueur2) n'a pas entré une case valide"
-                    Write-Host "La case entrée n'est pas valide, veuillez recommencer"
-                    $tour -= 1
-                    Continue
-                }
-            }
+            $tour = tour -joueur $joueur2 -tour $tour
         }
 
         $termine = checkWinner -grille $Grille
 
-        if ($tour % 2 -ne 0 -and $termine) {
+        if (($tour % 2 -ne 0) -and $termine) {
             WriteScore -gagnant $joueur1
         }
-        elseif ($tour % 2 -eq 0 -and $termine) {
+        elseif (($tour % 2 -eq 0) -and $termine) {
             WriteScore -gagnant $joueur2
         }
-
-
     }
 
-    Write-Host $Grille
+    # Write-Host $Grille
 
     if ($tour % 2 -eq 0) {
         Write-Host "$($joueur2) a gagné la partie"
@@ -426,10 +353,12 @@ function jeu {
         Write-Host "$($joueur1) a gagné la partie"
     }
 
+    
     whatToDo
 }
 
-
+# Ce qui va s'effectuer au lancement du script
 log -TypeEntree "[INFO]" -message "Lancement du programme"
+afficherRegles
 whatToDo
 
