@@ -180,7 +180,7 @@ function WriteScore {
     $exists = $false
 
     for ($i = 0; $i -lt $board.Count; $i++) {
-        if ($board[$i].Utilisateur.ToLower -eq $gagnant) {
+        if ($board[$i].Utilisateur.ToLower() -eq $gagnant) {
             $exists = $true
             break
         }
@@ -188,7 +188,7 @@ function WriteScore {
 
     if ($exists) {
         for ($i = 0; $i -lt $board.Count; $i++) {
-            if ($board[$i].Utilisateur.ToLower -eq $gagnant) {
+            if ($board[$i].Utilisateur.ToLower() -eq $gagnant) {
                 [int32] $score = $board[$i].Score
                 $score++
                 $board[$i].Score = $score
@@ -199,7 +199,14 @@ function WriteScore {
         $board | Export-Csv -Path .\leaderboard.csv -Delimiter ";" -Encoding utf8
     }
     else {
-        "$($gagnant.ToLower());1;$(Get-Date)" | Out-File -FilePath .\leaderboard.csv -Append -Encoding utf8
+        $nouveauGagnant = [PSCustomObject]@{
+            Utilisateur = $gagnant.ToLower()
+            Score = 1
+            Date_du_dernier_match = $(Get-Date)
+        }
+
+        $board += $nouveauGagnant
+        $board | Export-Csv -Path .\leaderboard.csv -Delimiter ";"
     }
     
     
@@ -385,7 +392,9 @@ function jeu {
 }
 
 # Ce qui va s'effectuer au lancement du script
-log -TypeEntree "[INFO]" -message "Lancement du programme"
+<# log -TypeEntree "[INFO]" -message "Lancement du programme"
 afficherRegles
-whatToDo
+whatToDo #>
+
+WriteScore -gagnant "Nyanya"
 
