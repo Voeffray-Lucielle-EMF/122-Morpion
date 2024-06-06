@@ -17,6 +17,19 @@ param(
     [string] $joueur2
 )
 
+# Création de la grille de partie
+$global:Grille = [char[]] @"
+|===|=A=|=B=|=C=|===|
+---------------------
+|=1=|   |   |   |=1=|
+---------------------
+|=2=|   |   |   |=2=|
+---------------------
+|=3=|   |   |   |=3=|
+---------------------
+|===|=A=|=B=|=C=|===| 
+"@
+
 # Les emplacements dans la grille qui doivent être modifiés y mettre un pion. Chaque emplacement a le nom de sa case.
 $global:A1 = 64
 $global:B1 = 68
@@ -151,7 +164,7 @@ function checkDraw {
         [char[]] $grille
     )
 
-    $cases = @($grille[$A1],$grille[$A2],$grille[$A3],$grille[$B1], $grille[$B2], $grille[$B3],$grille[$C1], $grille[$C2], $grille[$C3])
+    $cases = @($grille[$A1], $grille[$A2], $grille[$A3], $grille[$B1], $grille[$B2], $grille[$B3], $grille[$C1], $grille[$C2], $grille[$C3])
     
 }
 
@@ -205,7 +218,8 @@ function tour {
 
     if ($joueur -eq $joueur1) {
         $pion = "X"
-    } elseif ($joueur -eq $joueur2) {
+    }
+    elseif ($joueur -eq $joueur2) {
         $pion = "O"
     }
 
@@ -324,19 +338,6 @@ function tour {
 
 # Fonctionnement du jeu
 function jeu {
-    
-    # Création de la grille de partie
-    $global:Grille = [char[]] @"
-    |===|=A=|=B=|=C=|===|
-    ---------------------
-    |=1=|   |   |   |=1=|
-    ---------------------
-    |=2=|   |   |   |=2=|
-    ---------------------
-    |=3=|   |   |   |=3=|
-    ---------------------
-    |===|=A=|=B=|=C=|===| 
-"@
 
     
     [int32] $tour = 0
@@ -373,7 +374,8 @@ function jeu {
             Write-Host $Grille
             Write-Host "$($joueur2) a gagné la partie"
             WriteScore -gagnant $joueur2
-        } elseif ($draw) {
+        }
+        elseif ($draw) {
             Write-Host $Grille
             Write-Host "MATCH NUL !!!"
         }
