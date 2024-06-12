@@ -95,6 +95,7 @@ function afficherRegles {
     }
     catch {
         Log -TypeEntree "[ERROR]" -message "Erreur lors de la lecture du fichier des règles"
+        # Créer le fichier
         Out-File -FilePath "regles.txt" -Encoding utf8 -InputObject @"
         Bienvenue dans le jeu du Morpion !!!
         Afin de me simplifier la tâche, je vous invite à jouer à tour de rôle sur un PC
@@ -106,6 +107,7 @@ function afficherRegles {
         Bonne Chance !!!
 "@
         Log -TypeEntree "[DEBUG]" -message "règles.txt créé"
+        # Retenter d'afficher les règles
         afficherRegles
     }
 }
@@ -127,6 +129,9 @@ function placerPion {
 
 }
 
+# Contrôle s'il y a un gagnant
+# - Si oui: ret TRUE
+# - Si non: ret FALSE
 function checkWinner {
     param (
         [Parameter(Mandatory = $true)]
