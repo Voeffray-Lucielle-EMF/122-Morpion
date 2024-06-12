@@ -57,10 +57,11 @@ function log {
 # La fonction va demander aux joueurs la prochaine action qu'ils souhaite effectuer: -Jouer -Afficher le scoreboard -Quitter. S'ils font une erreur, le script boude et quitte 
 function whatToDo {
 
-    $Options = Read-Host "Voulez-vous voir le scoreboard (scoreboard), jouer (jouer) ou quitter le jeu (quitter) ?"
+    $Options = Read-Host "Voulez-vous voir les règles (regles), voir le scoreboard (scoreboard), jouer (jouer) ou quitter le jeu (quitter) ?"
 
     switch ($Options) {
         "jouer" { log -TypeEntree "[INFO]" -message "----- Début du jeu entre $($joueur1) et $($joueur2) -----"; jeu }
+        "regles" { afficherRegles; log -TypeEntree "[INFO]" -message "Affichage des règles demandé" }
         "scoreboard" { afficherScore log -TypeEntree "[INFO]" -message "Affichage du score demandé" }
         "quitter" { Write-Host "Extinction des feux"; log -TypeEntree "[INFO]" -message "Extinction des feux" ; exit }
         Default { Write-Host "Faut écrire correctement ! Pour la peine je boude, adieu"; Log -TypeEntree "[DEBUG]" -message "Les joueurs n'ont pas entré une donnée correcte"; exit }
@@ -77,11 +78,11 @@ function afficherScore {
         Out-Host -InputObject $board
     }
     catch {
-        Log -TypeEntree "[DEBUG]" -message "Erreur lors de la lecture du fichier leaderboard.csv"
+        Log -TypeEntree "[ERROR]" -message "Erreur lors de la lecture du fichier leaderboard.csv"
         #Créer le fichier leaderboard.csv
         Out-File -FilePath "leaderboard.csv" -Encoding utf8 -Append -InputObject '"Utilisateur";"Score";"Date_du_dernier_match"'
-        Log -TypeEntree "[INFO]" -message "leaderboard.csv créé"
-        Writ-Host "Le scoreboard est vide, veuillez jouer une partie pour pouvoir afficher les scores"
+        Log -TypeEntree "[DEBUG]" -message "leaderboard.csv créé"
+        Write-Host "Le scoreboard est vide, veuillez jouer une partie pour pouvoir afficher les scores"
     }
 
     whatToDo
@@ -91,11 +92,11 @@ function afficherScore {
 # Affiche les règles dans le terminal
 function afficherRegles {
     try {
-        Get-Content -Path .\regles.txt | Write-Host
+        Get-Content -Path .\regles.txt -ErrorAction Stop | Write-Host
     }
     catch {
-        Log -TypeEntree "[DEBUG]" -message "Erreur lors de la lecture du fichier des règles"
-        Out-File -FilePath "regles.txt" -Encoding utf8 -Append -InputObject @"
+        Log -TypeEntree "[ERROR]" -message "Erreur lors de la lecture du fichier des règles"
+        Out-File -FilePath "regles.txt" -Encoding utf8 -InputObject @"
         Bienvenue dans le jeu du Morpion !!!
         Afin de me simplifier la tâche, je vous invite à jouer à tour de rôle sur un PC
         Les règles sont simples:
@@ -105,11 +106,12 @@ function afficherRegles {
         
         Bonne Chance !!!
 "@
-        afficherRegles
+        Log -TypeEntree "[DEBUG]" -message "règles.txt créé"
+        # afficherRegles
     }
 }
 
-#Délégation du placement du pion dans la grille
+# Délégation du placement du pion dans la grille
 function placerPion {
     param (
         [Parameter(Mandatory = $true)]
@@ -175,7 +177,16 @@ function WriteScore {
         [string] $gagnant
     )
 
-    $board = Import-Csv -Path .\leaderboard.csv -Delimiter ";"
+    try {
+        $board = Import-Csv -Path "leaderboard.csv" -Delimiter ";"
+    }
+    catch {
+        Log -TypeEntree "[ERROR]" -message "Erreur lors de la lecture du fichier leaderboard.csv"
+        #Créer le fichier leaderboard.csv
+        Out-File -FilePath "leaderboard.csv" -Encoding utf8 -Append -InputObject '"Utilisateur";"Score";"Date_du_dernier_match"'
+        Log -TypeEntree "[DEBUG]" -message "leaderboard.csv créé"
+        $board = Import-Csv -Path "leaderboard.csv" -Delimiter ";"
+    }
 
     $exists = $false
 
@@ -200,8 +211,8 @@ function WriteScore {
     }
     else {
         $nouveauGagnant = [PSCustomObject]@{
-            Utilisateur = $gagnant.ToLower()
-            Score = 1
+            Utilisateur           = $gagnant.ToLower()
+            Score                 = 1
             Date_du_dernier_match = $(Get-Date)
         }
 
@@ -392,9 +403,9 @@ function jeu {
 }
 
 # Ce qui va s'effectuer au lancement du script
-<# log -TypeEntree "[INFO]" -message "Lancement du programme"
+log -TypeEntree "[INFO]" -message "Lancement du programme"
 afficherRegles
-whatToDo #>
+whatToDo
 
-WriteScore -gagnant "Nyanya"
+
 
