@@ -11,9 +11,9 @@ Description: Jeu du morpion avec un scoreboard et des logs
 #>
 
 param(
-    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory = $true, ValueFromPipeline = $false)]
     [string] $joueur1,
-    [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+    [Parameter(Mandatory = $true, ValueFromPipeline = $false)]
     [string] $joueur2
 )
 
