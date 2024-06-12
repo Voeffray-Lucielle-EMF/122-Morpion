@@ -31,15 +31,15 @@ $global:Grille = [char[]] @"
 "@
 
 # Les emplacements dans la grille qui doivent être modifiés y mettre un pion. Chaque emplacement a le nom de sa case.
-$global:A1 = 64
-$global:B1 = 68
-$global:C1 = 72
-$global:A2 = 118
-$global:B2 = 122
-$global:C2 = 126
-$global:A3 = 172
-$global:B3 = 176
-$global:C3 = 180
+$global:A1 = 52
+$global:B1 = 56
+$global:C1 = 60
+$global:A2 = 98
+$global:B2 = 102
+$global:C2 = 106
+$global:A3 = 144
+$global:B3 = 148
+$global:C3 = 152
 
 # Ajouter une ligne de log au fichier logs.log
 function log {
