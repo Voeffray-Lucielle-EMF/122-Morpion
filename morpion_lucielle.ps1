@@ -4,7 +4,7 @@ Autrice: Lucielle Anya Voeffray
 Date de création: 22.05.2024
 Contact: lucielle.voeffray@studentfr.ch
 
-Version: 0.5
+Version: 1.0
 
 Description: Jeu du morpion avec un scoreboard et des logs
 -----------------------------------------------------------
@@ -57,11 +57,10 @@ function log {
 # La fonction va demander aux joueurs la prochaine action qu'ils souhaite effectuer: -Jouer -Afficher le scoreboard -Quitter. S'ils font une erreur, le script boude et quitte 
 function whatToDo {
 
-    $Options = Read-Host "Voulez-vous voir les règles (regles), voir le scoreboard (scoreboard), jouer (jouer) ou quitter le jeu (quitter) ?"
+    $Options = Read-Host "Voulez-vous voir le scoreboard (scoreboard), jouer (jouer) ou quitter le jeu (quitter) ?"
 
     switch ($Options) {
         "jouer" { log -TypeEntree "[INFO]" -message "----- Début du jeu entre $($joueur1) et $($joueur2) -----"; jeu }
-        "regles" { afficherRegles; log -TypeEntree "[INFO]" -message "Affichage des règles demandé" }
         "scoreboard" { afficherScore log -TypeEntree "[INFO]" -message "Affichage du score demandé" }
         "quitter" { Write-Host "Extinction des feux"; log -TypeEntree "[INFO]" -message "Extinction des feux" ; exit }
         Default { Write-Host "Faut écrire correctement ! Pour la peine je boude, adieu"; Log -TypeEntree "[DEBUG]" -message "Les joueurs n'ont pas entré une donnée correcte"; exit }
@@ -107,7 +106,7 @@ function afficherRegles {
         Bonne Chance !!!
 "@
         Log -TypeEntree "[DEBUG]" -message "règles.txt créé"
-        # afficherRegles
+        afficherRegles
     }
 }
 
