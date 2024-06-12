@@ -159,6 +159,9 @@ function checkWinner {
     
 }
 
+# Contrôle s'il est encore possible de poser un pion:
+# - Si oui: ret TRUE
+# - Si non: ret FALSE
 function checkDraw {
     param (
         [Parameter(Mandatory = $true)]
@@ -166,6 +169,17 @@ function checkDraw {
     )
 
     $cases = @($grille[$A1], $grille[$A2], $grille[$A3], $grille[$B1], $grille[$B2], $grille[$B3], $grille[$C1], $grille[$C2], $grille[$C3])
+
+    $ret = $true
+
+    foreach ($case in $cases) {
+        if ($case = " ") {
+            $ret = $false
+            break;
+        }
+    }
+
+    return $ret
     
 }
 
@@ -240,6 +254,8 @@ function tour {
         $pion = "O"
     }
 
+    # Demande au joueur sur quelle case poser et grâce à un switch appelle la fonction de placement de pion
+    # Si la case entrée est invalide, on diminue 1 de $toure et on retourne pour répéter le tour, sinon on retourne $toure sans changement
     $move = Read-Host "$($joueur), dans quelle case souhaitez-vous poser votre pion ?"
     switch ($move.ToUpper()) {
         "A1" { 
