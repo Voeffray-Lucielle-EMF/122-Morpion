@@ -17,18 +17,6 @@ param(
     [string] $joueur2
 )
 
-# Création de la grille de partie
-$global:Grille = [char[]] @"
-|===|=A=|=B=|=C=|===|
----------------------
-|=1=|   |   |   |=1=|
----------------------
-|=2=|   |   |   |=2=|
----------------------
-|=3=|   |   |   |=3=|
----------------------
-|===|=A=|=B=|=C=|===| 
-"@
 
 # Les emplacements dans la grille qui doivent être modifiés y mettre un pion. Chaque emplacement a le nom de sa case.
 $global:A1 = 52
@@ -377,6 +365,18 @@ function tour {
 # Fonctionnement du jeu
 function jeu {
 
+    # Création de la grille de partie
+    $global:Grille = [char[]] @"
+|===|=A=|=B=|=C=|===|
+---------------------
+|=1=|   |   |   |=1=|
+---------------------
+|=2=|   |   |   |=2=|
+---------------------
+|=3=|   |   |   |=3=|
+---------------------
+|===|=A=|=B=|=C=|===| 
+"@
     
     [int32] $tour = 0
 
